@@ -3,34 +3,39 @@
 
 %global npm_name bson
 # Although there are tests
-# the dependancies aren't in Fedora yet
+# the dependencies aren't in Fedora yet
 %global enable_tests 0
 
 %{?nodejs_find_provides_and_requires}
 
-Summary:       A bson parser for node.js and the browser
-Name:          %{?scl_prefix}nodejs-%{npm_name}
-Version:       0.4.21
-Release:       1%{?dist}
-Group:         Development/Languages
-License:       ASL 2.0
-URL:           https://github.com/mongodb/js-bson
-Source0:       http://registry.npmjs.org/%{npm_name}/-/%{npm_name}-%{version}.tgz
+Summary:        A bson parser for node.js and the browser
+Name:           %{?scl_prefix}nodejs-%{npm_name}
+Version:        0.4.21
+Release:        2%{?dist}
+License:        ASL 2.0
+URL:            https://github.com/mongodb/js-bson
+Source0:        http://registry.npmjs.org/%{npm_name}/-/%{npm_name}-%{version}.tgz
+
 %if 0%{?enable_tests}
 ## To get the tests (Source1), do the following
 # git clone https://github.com/mongodb/js-bson.git
 # cd js-bson/
-# tar cfz nodejs-bson-test-0.2.3.tar.gz test/
-Source1:       nodejs-bson-test-0.2.3.tar.gz
+# tar cfz nodejs-bson-test-0.4.21.tar.gz test/
+Source1:        nodejs-bson-test-0.4.21.tar.gz
 %endif
-BuildRequires: %{?scl_prefix}node-gyp
-BuildRequires: %{?scl_prefix}nodejs-devel
-BuildRequires: %{?scl_prefix}nodejs-nan
+
+BuildRequires:  %{?scl_prefix}node-gyp
+BuildRequires:  %{?scl_prefix}nodejs-devel
+BuildRequires:  %{?scl_prefix}nodejs-nan
+
 %if 0%{?enable_tests}
-BuildRequires: %{?scl_prefix}npm(gleak)
-BuildRequires: %{?scl_prefix}npm(nodeunit)
-BuildRequires: %{?scl_prefix}npm(one)
+BuildRequires:  %{?scl_prefix}npm(gleak)
+BuildRequires:  %{?scl_prefix}npm(nodeunit)
+BuildRequires:  %{?scl_prefix}npm(one)
 %endif
+
+BuildArch:      noarch
+ExclusiveArch:  %{nodejs_arches} noarch
 
 %description
 A JS/C++ Bson parser for node, used in the MongoDB Native driver.
@@ -47,7 +52,11 @@ cp -pr alternate_parsers tools lib deserializer_bak.js bower.json package.json %
 
 %nodejs_symlink_deps
 
+%if 0%{?enable_tests}
 %check
+tar xfz %{SOURCE1}
+nodeunit ./test/node && TEST_NATIVE=TRUE nodeunit ./test/node
+%endif
 
 %files
 %doc README.md
@@ -55,6 +64,10 @@ cp -pr alternate_parsers tools lib deserializer_bak.js bower.json package.json %
 %{nodejs_sitelib}/%{npm_name}
 
 %changelog
+* Mon Feb 29 2016 Zuzana Svetlikova <zsvetlik@redhat.com> - 0.4.21-2
+- Add ExclusiveArch and BuildArch
+- properly disable tests
+
 * Wed Feb 17 2016 Tomas Hrcka <thrcka@redhat.com> - 0.4.21-1
 - Rebase to latest upstream release
 - This package is no longer native module
